@@ -81,6 +81,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'marketdb.sqlite3',
+        'OPTIONS': {
+            'timeout': 20,
+        }
     }
 }
 

@@ -22,18 +22,32 @@ $(document).ready(function () {
     "rutLength",
     function (value, element) {
       var parts = value.split("-");
-      return this.optional(element) || parts[0].length === 8;
+      if (parts.length != 2) {
+        return false;
+      }
+      var rut = parts[0].replace(/\./g, ""); // Quita los puntos
+      return this.optional(element) || (rut.length >= 7 && rut.length <= 8);
     },
-    "El RUT debe tener 8 caracteres antes del guion"
+    "El RUT debe tener 7 u 8 dígitos antes del guion"
   );
 
-  // Método personalizado para validar la longitud del teléfono
+  // Método personalizado para validar la longitud del teléfono (permitiendo espacios)
   $.validator.addMethod(
     "phoneLength",
     function (value, element) {
-      return this.optional(element) || value.length === 9;
+      return this.optional(element) || value.replace(/\s/g, "").length === 9;
     },
     "El teléfono debe tener 9 dígitos"
+  );
+
+  // Método personalizado para validar que el DV coincida
+  $.validator.addMethod(
+    "dvMatch",
+    function (value, element) {
+      var rut = $("#rut").val().split("-")[0].replace(/\./g, "");
+      return this.optional(element) || dv(rut) == value.toLowerCase();
+    },
+    "El dígito verificador no coincide"
   );
 
   $("#trabajadorForm").validate({
@@ -54,7 +68,13 @@ $(document).ready(function () {
       },
       direccion: {
         required: true,
-        lettersonly: true,
+        // Permite letras y espacios
+        lettersonly: {
+          param: true,
+          depends: function (element) {
+            return $(element).val().trim() !== "";
+          },
+        },
       },
       ocupacion: {
         required: true,
@@ -71,13 +91,14 @@ $(document).ready(function () {
       dv: {
         required: true,
         pattern: /^[0-9Kk]{1}$/,
+        dvMatch: true, // Validación para que coincida el DV
       },
     },
     messages: {
       rut: {
         required: "Por favor ingrese su RUT",
         rut: "El RUT ingresado no es válido",
-        rutLength: "El RUT debe tener 8 caracteres antes del guion",
+        rutLength: "El RUT debe tener 7 u 8 dígitos antes del guion",
       },
       telefono: {
         required: "Por favor ingrese su teléfono",
@@ -90,7 +111,7 @@ $(document).ready(function () {
       },
       direccion: {
         required: "Por favor ingrese su dirección",
-        lettersonly: "Solo se permiten letras",
+        lettersonly: "Solo se permiten letras y espacios",
       },
       ocupacion: {
         required: "Por favor ingrese su ocupación",
@@ -107,18 +128,19 @@ $(document).ready(function () {
       dv: {
         required: "Por favor ingrese su dígito verificador",
         pattern: "Solo se permiten números y la letra K",
+        dvMatch: "El dígito verificador no coincide",
       },
     },
   });
 
   // Función para validar el RUT chileno
   function validarRut(rutCompleto) {
-    if (!/^[0-9]+-[0-9Kk]$/.test(rutCompleto)) {
+    if (!/^[0-9\.]+-[0-9Kk]$/.test(rutCompleto)) {
       return false;
     }
     var tmp = rutCompleto.split("-");
     var digv = tmp[1];
-    var rut = tmp[0];
+    var rut = tmp[0].replace(/\./g, ""); // Quita los puntos
     if (digv == "K") digv = "k";
     return dv(rut) == digv;
   }
