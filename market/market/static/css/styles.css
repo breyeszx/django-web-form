@@ -1,0 +1,10 @@
+body {
+  background-color: beige;
+  color: black;
+  font-family: Roboto, sans-serif;
+}
+
+#txta {
+  field-size: content;
+  resize: none;
+}
