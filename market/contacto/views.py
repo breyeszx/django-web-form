@@ -8,9 +8,6 @@ from django.urls import reverse
 def index(request):
     return render(request, 'contacto/index.html')
 
-def contacto(request):
-    return render(request, 'contacto/contacto.html')
-
 def registro_view(request):
     if request.method == 'POST':
         form = TrabajadorForm(request.POST)

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'contacto',
     'django_bootstrap5',
+    'consulta',
 ]
 
 MIDDLEWARE = [
